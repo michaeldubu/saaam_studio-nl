@@ -1,0 +1,71 @@
+// npc-combat.saaam
+// SAAAM Module: Real-Time Combat AI – Waves, Roles, Coordination
+
+var active_enemies = [];
+
+function SpawnWave(wave_number) {
+  var enemy_types = ["scout", "heavy", "flanker"];
+  var count = Min(5 + wave_number, 15);
+
+  for (var i = 0; i < count; i++) {
+    active_enemies.push({
+      type: RandomChoice(enemy_types),
+      health: 100 + wave_number * 10,
+      state: "idle"
+    });
+  }
+
+  log("[NPCCombat] Spawned wave " + wave_number + ": " + count + " enemies");
+}
+
+function CoordinateAttacks(player_position) {
+  for (var i = 0; i < active_enemies.length; i++) {
+    var enemy = active_enemies[i];
+
+    if (enemy.state == "idle") {
+      if (enemy.type == "scout") {
+        log("[NPCCombat] Scout enemy calling reinforcements!");
+        enemy.state = "alert";
+      } else if (enemy.type == "heavy") {
+        log("[NPCCombat] Heavy enemy charging at player!");
+        enemy.state = "attacking";
+      } else if (enemy.type == "flanker") {
+        log("[NPCCombat] Flanker enemy circling around!");
+        enemy.state = "flanking";
+      }
+    }
+  }
+}
+
+function UpdateEnemyStates(player_position) {
+  for (var i = 0; i < active_enemies.length; i++) {
+    var enemy = active_enemies[i];
+
+    if (enemy.state == "attacking" && Random() < 0.2) {
+      log("[NPCCombat] Enemy " + enemy.type + " took damage!");
+      enemy.health -= 20;
+
+      if (enemy.health <= 0) {
+        log("[NPCCombat] Enemy " + enemy.type + " defeated!");
+        RemoveFromArray(active_enemies, enemy);
+      }
+    }
+  }
+}
+
+function UpdateNPCCombat(dt, wave_number, player_position) {
+  if (wave_number > active_enemies.length / 5) {
+    SpawnWave(wave_number);
+  }
+
+  CoordinateAttacks(player_position);
+  UpdateEnemyStates(player_position);
+}
+
+function InitializeNPCCombat() {
+  log("[NPCCombat] Initializing NPC Combat");
+}
+
+function ShutdownNPCCombat() {
+  log("[NPCCombat] Shutting down NPC Combat");
+}

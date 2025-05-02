@@ -1,0 +1,27 @@
+// narrative.saaam
+// SAAAM Module: Dynamic Narrative Generator – Quest Creation & Resolution
+
+var plotlines = [];
+
+function CreateQuest(npc, player_action) {
+  var quest = {
+    npc: npc,
+    objective: "Respond to " + player_action,
+    reward: 50
+  };
+
+  plotlines.push(quest);
+  log("[NarrativeGenerator] New quest created: " + ToString(quest));
+  return quest;
+}
+
+function ResolveQuest(quest) {
+  RemoveFromArray(plotlines, quest);
+  log("[NarrativeGenerator] Quest resolved: " + ToString(quest));
+
+  // Hook: generate follow-ups if needed
+  if (Random() > 0.5) {
+    var next = CreateQuest(quest.npc, "Follow-up to previous outcome");
+    log("[NarrativeGenerator] New thread created: " + ToString(next));
+  }
+}

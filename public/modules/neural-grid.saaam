@@ -1,0 +1,55 @@
+// neural-grid.saaam
+// SAAAM Module: Propagating Neural Grid (Ripple Memory & Awareness)
+
+var neural_grid = [];
+
+function InitializeNeuralGrid(size) {
+  neural_grid = [];
+  for (var x = 0; x < size; x++) {
+    var row = [];
+    for (var y = 0; y < size; y++) {
+      row.push({
+        state: 0.5,
+        connections: []
+      });
+    }
+    neural_grid.push(row);
+  }
+}
+
+function ConnectNeuralGrid() {
+  for (var x = 0; x < neural_grid.length; x++) {
+    for (var y = 0; y < neural_grid[x].length; y++) {
+      var neighbors = GetNeighbors(x, y);
+      neural_grid[x][y].connections = [];
+      for (var i = 0; i < neighbors.length; i++) {
+        neural_grid[x][y].connections.push({ node: neighbors[i], weight: 0.1 });
+      }
+    }
+  }
+}
+
+function GetNeighbors(x, y) {
+  var directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  var neighbors = [];
+
+  for (var i = 0; i < directions.length; i++) {
+    var nx = x + directions[i][0];
+    var ny = y + directions[i][1];
+    if (nx >= 0 && nx < neural_grid.length && ny >= 0 && ny < neural_grid[0].length) {
+      neighbors.push(neural_grid[nx][ny]);
+    }
+  }
+
+  return neighbors;
+}
+
+function PropagateChange(x, y, intensity) {
+  var node = neural_grid[x][y];
+  node.state += intensity;
+
+  for (var i = 0; i < node.connections.length; i++) {
+    var conn = node.connections[i];
+    conn.node.state += conn.weight * intensity;
+  }
+}

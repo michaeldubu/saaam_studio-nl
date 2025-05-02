@@ -1,0 +1,103 @@
+// self-regulation.saaam
+// SAAAM Module: Conscious NPCs, Chaos Monitoring, Ecological Balancing
+
+// --- World Stability Monitoring ---
+var chaos_metrics = {
+  environmental_flux: 0.0,
+  npc_behavior_variance: 0.0,
+  resource_distribution: 0.0
+};
+
+var stability_threshold = 0.85;
+
+function CalculateStabilityIndex() {
+  var total = 0;
+  var count = 0;
+  for (var key in chaos_metrics) {
+    total += chaos_metrics[key];
+    count++;
+  }
+  return total / count;
+}
+
+function MonitorWorldState() {
+  var stability = CalculateStabilityIndex();
+  if (stability < stability_threshold) {
+    log("[WorldStateMonitor] Stability breached! Triggering corrections...");
+    TriggerCorrectionProtocols();
+  }
+}
+
+function TriggerCorrectionProtocols() {
+  log("[WorldStateMonitor] Executing correction protocols...");
+  // TODO: Environmental rebalancing logic
+}
+
+// --- NPC Consciousness System ---
+var npc_behavior_log = [];
+var decision_confidence = 1.0;
+var learning_rate = 0.01;
+
+function MonitorNPCDecision(action, context) {
+  npc_behavior_log.push({
+    action: action,
+    context: context,
+    timestamp: current_time
+  });
+
+  if (npc_behavior_log.length > 100) {
+    AnalyzeBehaviorPatterns();
+  }
+}
+
+function CorrectBehavior(feedback) {
+  learning_rate *= decision_confidence;
+  log("[NPCConsciousness] Adjusting learning rate to: " + learning_rate);
+  UpdateNeuralWeights(feedback);
+}
+
+function AnalyzeBehaviorPatterns() {
+  log("[NPCConsciousness] Analyzing behavior patterns...");
+  // TODO: Add pattern recognition here
+}
+
+function UpdateNeuralWeights(feedback) {
+  log("[NPCConsciousness] Updating neural weights with feedback: " + feedback);
+}
+
+// --- Ecosystem Regulator ---
+var resource_thresholds = {
+  primary: 0.4,
+  secondary: 0.3,
+  tertiary: 0.3
+};
+
+function MonitorEcosystem() {
+  var dist = GetResourceDistribution();
+  if (DetectImbalance(dist)) {
+    log("[EcoSystemRegulator] Resource imbalance detected! Rebalancing...");
+    TriggerRebalancing();
+  }
+}
+
+function GetResourceDistribution() {
+  return {
+    primary: 0.35,
+    secondary: 0.33,
+    tertiary: 0.32
+  };
+}
+
+function DetectImbalance(dist) {
+  for (var key in dist) {
+    if (abs(dist[key] - resource_thresholds[key]) > 0.1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function TriggerRebalancing() {
+  log("[EcoSystemRegulator] Rebalancing resources...");
+  // TODO: Rebalance logic
+}

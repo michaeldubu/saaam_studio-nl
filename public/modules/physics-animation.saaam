@@ -1,0 +1,96 @@
+// physics-animation.saaam
+// SAAAM Module: Parallel Physics, Skeletal Animation, Ragdolls & IK
+
+// --- Physics System ---
+var physics_islands = [];
+
+function SolvePhysics(deltaTime) {
+  UpdateBroadphase();
+  var pairs = GenerateCollisionPairs();
+
+  BuildIslands(pairs);
+
+  for (var i = 0; i < physics_islands.length; i++) {
+    SolveIsland(physics_islands[i], deltaTime);
+  }
+}
+
+function SolveIsland(island, deltaTime) {
+  for (var iteration = 0; iteration < 10; iteration++) {
+    for (var i = 0; i < island.constraints.length; i++) {
+      SolveConstraint(island.constraints[i], deltaTime);
+    }
+  }
+
+  for (var i = 0; i < island.bodies.length; i++) {
+    IntegrateBody(island.bodies[i], deltaTime);
+  }
+}
+
+// --- Skeletal Animation (Dual Quaternion Skinning) ---
+function UpdateSkeletalAnimation(clip, time) {
+  for (var i = 0; i < clip.channels.length; i++) {
+    var ch = clip.channels[i];
+    var [t0, t1, alpha] = FindKeyframes(ch, time);
+    var val = MixVec4(ch.values[t0], ch.values[t1], alpha);
+
+    if (ch.path == "Translation") {
+      ApplyDualQuatTranslation(i, val);
+    }
+    // Add support for rotation/scale if needed
+  }
+}
+
+// --- IK System (FABRIK) ---
+function SolveIKChain(chain) {
+  // Forward reaching pass
+  for (var i = chain.boneIndices.length - 1; i > 0; i--) {
+    MoveBoneTowardTarget(chain.boneIndices[i], chain.target);
+  }
+
+  // Backward reaching pass
+  for (var i = 0; i < chain.boneIndices.length - 1; i++) {
+    MaintainBoneLength(chain.boneIndices[i], chain.boneIndices[i + 1]);
+  }
+}
+
+// --- Animation State Machine ---
+var currentAnimState = null;
+var transitions = [];
+
+function UpdateAnimStateMachine(deltaTime) {
+  for (var i = 0; i < transitions.length; i++) {
+    var tr = transitions[i];
+    if (tr.from == currentAnimState && tr.condition()) {
+      TransitionToState(tr.to, tr.duration);
+    }
+  }
+
+  if (currentAnimState != null) {
+    UpdateAnimationState(currentAnimState, deltaTime);
+  }
+}
+
+// --- Ragdoll System ---
+var ragdolls = [];
+
+function ActivateRagdoll(entity) {
+  var ragdoll = GetRagdoll(entity);
+  ragdoll.active = true;
+
+  for (var i = 0; i < ragdoll.bones.length; i++) {
+    var bone = ragdoll.bones[i];
+    SetRigidBodyTransform(bone.body, GetAnimBoneTransform(bone));
+  }
+}
+
+function UpdateRagdolls(deltaTime) {
+  for (var i = 0; i < ragdolls.length; i++) {
+    var rag = ragdolls[i];
+    if (rag.active) {
+      for (var j = 0; j < rag.bones.length; j++) {
+        UpdateBoneFromPhysics(rag.bones[j]);
+      }
+    }
+  }
+}

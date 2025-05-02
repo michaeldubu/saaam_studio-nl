@@ -1,0 +1,53 @@
+// level-generator.saaam
+// SAAAM Module: Procedural Level Generator – Dynamic Hazards & Chunk Logic
+
+var level_chunks = {};
+
+function GenerateChunk(position) {
+  var hazard_types = ["spike_trap", "falling_platform", "energy_field"];
+  var hazards = [];
+
+  for (var i = 0; i < 3; i++) {
+    hazards.push({
+      type: RandomChoice(hazard_types),
+      intensity: RandomRangeInt(1, 3)
+    });
+  }
+
+  var chunk = {
+    position: position,
+    hazards: hazards,
+    features: RandomChoice(["platform", "pit", "trap"])
+  };
+
+  level_chunks[position] = chunk;
+  log("[LevelGen] Generated chunk at " + ToString(position));
+  return chunk;
+}
+
+function GetAdjacentChunks(position) {
+  var directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
+  for (var i = 0; i < directions.length; i++) {
+    var dx = directions[i][0];
+    var dy = directions[i][1];
+    var adj = [position[0] + dx, position[1] + dy];
+
+    if (!(adj in level_chunks)) {
+      GenerateChunk(adj);
+    }
+  }
+}
+
+function UpdateLevelGenerator(dt, player_position) {
+  GenerateChunk(player_position);
+  GetAdjacentChunks(player_position);
+}
+
+function InitializeLevelGenerator() {
+  log("[LevelGen] Initializing procedural level generator...");
+}
+
+function ShutdownLevelGenerator() {
+  log("[LevelGen] Shutting down level generator...");
+}

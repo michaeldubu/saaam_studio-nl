@@ -1,0 +1,90 @@
+// graphics.saaam
+// SAAAM Module: Shader Graphs, PBR, Particles, Post-Processing & HDR
+
+// --- Shader System ---
+var uniformData = {};
+
+function SetUniform(name, value) {
+  uniformData[name] = value;
+}
+
+function LoadShader(vertexSrc, fragmentSrc) {
+  ReflectShader(vertexSrc);
+  ReflectShader(fragmentSrc);
+  CreatePipeline();
+}
+
+// --- PBR Material System ---
+var materialParams = {
+  baseColor: vec4(1,1,1,1),
+  metallic: 0.5,
+  roughness: 0.5,
+  ao: 1.0,
+  emissive: 0.0,
+  normal: vec3(0,0,1)
+};
+
+function SetMaterialParam(name, value) {
+  materialParams[name] = value;
+}
+
+// --- Render Graph ---
+var renderPasses = [];
+
+function AddRenderPass(name, executor) {
+  renderPasses.push({ name: name, execute: executor });
+}
+
+function ExecuteRenderGraph(cmd) {
+  for (var i = 0; i < renderPasses.length; i++) {
+    renderPasses[i].execute(cmd);
+  }
+}
+
+// --- Compute Particles ---
+var particles = [];
+
+function EmitParticles(position, count) {
+  for (var i = 0; i < count; i++) {
+    particles.push({
+      position: vec4(position, 1.0),
+      velocity: RandomVec4(),
+      color: vec4(1, 1, 1, 1)
+    });
+  }
+}
+
+function UpdateParticles(deltaTime) {
+  DispatchCompute(particles, deltaTime);
+}
+
+// --- Post-Processing Stack ---
+var postProcessEffects = [];
+
+function AddPostEffect(name, shader) {
+  postProcessEffects.push({ name: name, shader: shader, enabled: true });
+}
+
+function RunPostProcessing(input, output) {
+  for (var i = 0; i < postProcessEffects.length; i++) {
+    if (postProcessEffects[i].enabled) {
+      ApplyShader(postProcessEffects[i].shader, input, output);
+    }
+  }
+}
+
+// --- Scene Renderer ---
+function RenderScene(scene, camera) {
+  var data = GatherRenderData(scene, camera);
+  CullObjects(data);
+  ExecuteRenderGraph(currentCommandBuffer);
+}
+
+// --- HDR + Tonemapping ---
+var exposure = 1.0;
+var tonemapOp = "ACES";
+
+function ProcessHDR(input, output) {
+  CalculateSceneLuminance(input);
+  ApplyTonemapping(input, output, tonemapOp);
+}

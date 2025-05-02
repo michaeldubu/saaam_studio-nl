@@ -1,0 +1,36 @@
+// npc-memory.saaam
+// SAAAM Module: NPC Memory and Relationships – Personal Experience & Social State
+
+var npc_memory_data = {};
+
+function AddMemory(npc_name, event) {
+  if (!(npc_name in npc_memory_data)) {
+    npc_memory_data[npc_name] = { memory: [], relationships: {} };
+  }
+
+  var m = npc_memory_data[npc_name].memory;
+  m.push(event);
+  if (m.length > 100) {
+    m.shift();  // Forget oldest
+  }
+}
+
+function UpdateRelationship(npc_name, other_npc, delta) {
+  if (!(npc_name in npc_memory_data)) {
+    npc_memory_data[npc_name] = { memory: [], relationships: {} };
+  }
+
+  var r = npc_memory_data[npc_name].relationships;
+  if (!(other_npc in r)) {
+    r[other_npc] = 0;
+  }
+
+  r[other_npc] += delta;
+}
+
+function GetRelationshipStatus(npc_name, other_npc) {
+  if (npc_name in npc_memory_data && other_npc in npc_memory_data[npc_name].relationships) {
+    return npc_memory_data[npc_name].relationships[other_npc];
+  }
+  return 0;
+}

@@ -1,0 +1,30 @@
+// procedural-world.saaam
+// SAAAM Module: Procedural World Generation – Biomes, Chunks, Seamless Expansion
+
+var terrain_chunks = {};
+
+function GenerateTerrainChunk(position) {
+  var chunk = {
+    position: position,
+    features: RandomChoice(["forest", "lake", "mountain"]),
+    density: RandomRange(0.5, 1.5)
+  };
+
+  terrain_chunks[position] = chunk;
+  log("[WorldGen] Generated terrain chunk at " + ToString(position));
+  return chunk;
+}
+
+function GetAdjacentTerrainChunks(position) {
+  var directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
+  for (var i = 0; i < directions.length; i++) {
+    var dx = directions[i][0];
+    var dy = directions[i][1];
+    var adj = [position[0] + dx, position[1] + dy];
+
+    if (!(adj in terrain_chunks)) {
+      GenerateTerrainChunk(adj);
+    }
+  }
+}
